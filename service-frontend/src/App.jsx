@@ -1,3 +1,4 @@
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 /* ===== PUBLIC ===== */
@@ -9,19 +10,19 @@ import ResetPassword from "./pages/ResetPassword";
 
 /* ===== ADMIN ===== */
 import AdminDashboard from "./pages/AdminDashboard";
-import AdminManagement from "./pages/AdminManagement";
 
 /* ===== VENDOR ===== */
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorServices from "./pages/VendorServices";
-import VendorEarnings from "./pages/VendorEarnings";
+import VendorOrdersPage from "./pages/VendorOrdersPage";
 
 /* ===== USER ===== */
 import UserDashboard from "./pages/UserDashboard";
+import ServicesPage from "./pages/ServicesPage";
+import BookService from "./pages/BookService";
 
 /* ===== SHARED ===== */
-import OrdersPage from "./pages/OrdersPage";
-import ServicesPage from "./pages/ServicesPage";
+import OrdersPage from "./pages/OrdersPage"; // Admin & User
 import PaymentPage from "./pages/PaymentPage";
 import ReviewsPage from "./pages/ReviewsPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -49,14 +50,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/admin/manage"
-          element={
-            <ProtectedRoute role="admin">
-              <AdminManagement />
-            </ProtectedRoute>
-          }
-        />
 
         {/* ========= VENDOR ========= */}
         <Route
@@ -76,10 +69,10 @@ export default function App() {
           }
         />
         <Route
-          path="/vendor/earnings"
+          path="/vendor/orders"
           element={
             <ProtectedRoute role="vendor">
-              <VendorEarnings />
+              <VendorOrdersPage />
             </ProtectedRoute>
           }
         />
@@ -93,17 +86,24 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* ========= SHARED ========= */}
         <Route
           path="/services"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="user">
               <ServicesPage />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/book-service"
+          element={
+            <ProtectedRoute role="user">
+              <BookService />
+            </ProtectedRoute>
+          }
+        />
 
+        {/* ========= SHARED (Admin & User) ========= */}
         <Route
           path="/orders"
           element={
@@ -112,8 +112,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* ========= PAYMENTS ========= */}
         <Route
           path="/payments"
           element={
@@ -122,7 +120,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/payment/:orderId"
           element={
@@ -131,8 +128,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* ========= REVIEWS ========= */}
         <Route
           path="/reviews"
           element={
@@ -141,7 +136,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/reviews/:serviceId"
           element={
@@ -150,8 +144,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* ========= PROFILE ========= */}
         <Route
           path="/profile"
           element={

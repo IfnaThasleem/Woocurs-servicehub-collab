@@ -2,26 +2,34 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function PaymentPage() {
+export default function PaymentPage({ orderId, vendorId }) {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
-
+  const [amount, setAmount] = useState(""); // User can type amount
   const token = localStorage.getItem("token");
 
   const handlePay = async () => {
+    if (!amount || Number(amount) <= 0) {
+      return alert("Please enter a valid amount");
+    }
+
     try {
       setLoading(true);
 
-      // DEMO payment success → create order / update booking
       await axios.post(
         "http://localhost:5000/api/payments",
-        { status: "paid" },
+        {
+          orderId,
+          amount: Number(amount),
+          status: "paid",
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Payment successful ✅");
-      navigate("/user/dashboard");
+
+      // Auto-redirect to review page
+      navigate(`/reviews/${orderId}/${vendorId}`);
     } catch (err) {
       console.error(err);
       alert("Payment failed");
@@ -32,13 +40,26 @@ export default function PaymentPage() {
 
   return (
     <div style={page}>
-      <h1>Payment</h1>
-      <p>Total Amount</p>
-      <h2>Rs. 5000</h2>
+      <div style={card}>
+        <h1 style={title}>Secure Payment</h1>
 
-      <button style={btn} onClick={handlePay} disabled={loading}>
-        {loading ? "Processing..." : "Pay Now"}
-      </button>
+        <div style={amountBox}>
+          <label style={label}>Enter Amount</label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0"
+            style={input}
+          />
+        </div>
+
+        <button style={btn(loading)} onClick={handlePay} disabled={loading}>
+          {loading ? "Processing..." : "Pay Now"}
+        </button>
+
+        <p style={note}>🔒 100% secure payment</p>
+      </div>
     </div>
   );
 }
@@ -46,16 +67,56 @@ export default function PaymentPage() {
 /* ===== STYLES ===== */
 const page = {
   minHeight: "100vh",
-  background: "#020617",
+  background: "linear-gradient(135deg, #020617, #020024)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   color: "white",
-  padding: "2rem",
 };
 
-const btn = {
-  padding: "12px 20px",
-  background: "#4f7cff",
-  border: "none",
+const card = {
+  background: "#020617",
+  borderRadius: "16px",
+  padding: "2.5rem",
+  width: "100%",
+  maxWidth: "420px",
+  boxShadow: "0 20px 40px rgba(79,124,255,0.25)",
+  border: "1px solid #1e293b",
+  textAlign: "center",
+};
+
+const title = { marginBottom: "1.5rem", fontSize: "28px", fontWeight: "600" };
+const amountBox = {
+  background: "#020024",
+  padding: "1.5rem",
+  borderRadius: "12px",
+  marginBottom: "2rem",
+  border: "1px solid #1e293b",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+};
+const label = { marginBottom: "6px", color: "#94a3b8" };
+const input = {
+  width: "100%",
+  padding: "12px",
   borderRadius: "8px",
+  background: "#1e293b",
   color: "white",
+  border: "1px solid #334155",
   fontSize: "16px",
 };
+
+const btn = (loading) => ({
+  width: "100%",
+  padding: "14px",
+  background: loading ? "#334155" : "#4f7cff",
+  border: "none",
+  borderRadius: "10px",
+  color: "white",
+  fontSize: "16px",
+  fontWeight: "600",
+  cursor: loading ? "not-allowed" : "pointer",
+  transition: "0.3s",
+});
+const note = { marginTop: "1.5rem", fontSize: "14px", color: "#94a3b8" };

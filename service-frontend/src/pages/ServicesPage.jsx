@@ -1,40 +1,27 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 export default function ServicesPage() {
-  const role = localStorage.getItem("role");
-  const token = localStorage.getItem("token");
-
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState(null);
-  const [date, setDate] = useState("");
-  const [notes, setNotes] = useState("");
+  const role = localStorage.getItem("role") || "";
+  const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/services").then((res) => {
-      setServices(res.data);
-    });
-  }, []);
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-  const bookService = async () => {
-    if (!date) return alert("Select date");
-
-    await axios.post(
-      "http://localhost:5000/api/orders",
-      {
-        serviceId: selectedService._id,
-        scheduledDate: date,
-        notes,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    alert("Service booked successfully");
-    setSelectedService(null);
-    setDate("");
-    setNotes("");
-  };
+    axios
+      .get("http://localhost:5000/api/services", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setServices(res.data))
+      .catch((err) => console.error(err));
+  }, [token, navigate]);
 
   return (
     <div style={page}>
@@ -42,7 +29,6 @@ export default function ServicesPage() {
 
       <div style={content}>
         <h2>Services</h2>
-
         <div style={grid}>
           {services.map((s) => (
             <div key={s._id} style={card}>
@@ -51,40 +37,27 @@ export default function ServicesPage() {
               <p><b>Rs. {s.price}</b></p>
 
               {role === "user" && (
-                <button style={btn} onClick={() => setSelectedService(s)}>
-                  Book Service
-                </button>
+                <button
+  style={btn}
+  onClick={() =>
+    navigate("/book-service", { state: { serviceId: s._id } })
+  }
+>
+  Book Service
+</button>
+
               )}
             </div>
           ))}
         </div>
       </div>
-
-      {/* ================= BOOKING MODAL ================= */}
-      {selectedService && (
-        <div style={overlay}>
-          <div style={modal}>
-            <h3>Book {selectedService.name}</h3>
-
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={input} />
-            <textarea placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} style={input} />
-
-            <button style={btn} onClick={bookService}>Confirm Booking</button>
-            <button style={cancelBtn} onClick={() => setSelectedService(null)}>Cancel</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-/* ================= STYLES ================= */
+/* ===== STYLES ===== */
 const page = { minHeight: "100vh", background: "#020617", color: "white" };
 const content = { padding: "2rem" };
 const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: "1.5rem" };
 const card = { background: "#0f172a", padding: "1.5rem", borderRadius: "12px" };
-const btn = { marginTop: "10px", padding: "8px", width: "100%", background: "#22c55e", border: "none", borderRadius: "6px" };
-const cancelBtn = { ...btn, background: "#ef4444" };
-const overlay = { position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center" };
-const modal = { background: "#0f172a", padding: "2rem", borderRadius: "12px", width: "350px" };
-const input = { width: "100%", padding: "10px", marginBottom: "10px" };
+const btn = { marginTop: "10px", padding: "8px", width: "100%", background: "#22c55e", border: "none", borderRadius: "6px", cursor: "pointer" };

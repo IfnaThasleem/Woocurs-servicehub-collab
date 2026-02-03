@@ -50,21 +50,29 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
     const user = await User.findOne({ email });
     if (!user)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
-    // Exclude password in response
-    const { password: pwd, ...userData } = user._doc;
+    // 🚫 Vendor approval check
+    if (user.role === "vendor" && !user.isApproved) {
+      return res.status(403).json({
+        message: "Vendor account pending admin approval",
+      });
+    }
 
-    // Generate token
+    const { password: pwd, ...userData } = user._doc;
     const token = generateToken(user._id, user.role);
+
+     // ===== REAL-TIME VENDOR LOGIN NOTIFICATION =====
+    if (user.role === "vendor" && req.app.get("io")) {
+      const io = req.app.get("io");
+      io.emit("newVendorLogin", { _id: user._id, name: user.name });
+    }
 
     res.status(200).json({
       message: "Login successful",
@@ -75,3 +83,5 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+

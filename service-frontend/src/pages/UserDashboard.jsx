@@ -58,7 +58,7 @@ export default function UserDashboard() {
   );
 }
 
-/* ================= CARD ================= */
+/* ================= CARD COMPONENT ================= */
 const Card = ({ icon, title, desc, onClick, highlight }) => (
   <div
     style={{

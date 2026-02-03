@@ -17,20 +17,34 @@ const orderSchema = new mongoose.Schema(
       ref: "Service",
       required: true,
     },
+
     totalPrice: {
       type: Number,
       required: true,
     },
+
     scheduledDate: {
       type: Date,
       required: true,
     },
+
+    /* ===== ORDER STATUS ===== */
     status: {
       type: String,
-      enum: ["pending", "inProgress", "completed"],
+      enum: ["pending", "inProgress", "completed", "cancelled"],
       default: "pending",
     },
-    notes: String,
+
+    /* ===== PAYMENT STATUS ===== */
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
+    },
+
+    notes: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
